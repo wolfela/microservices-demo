@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package go.micro.srv.consignment; 
+
+service ShippingService {
+  rpc CreateConsignment(Consignment) returns (Response) {}
+}
+
+message Consignment {
+  repeated int32 ints = 1;
+}
+
+
+message Response {
+  int32 result = 1;
+}

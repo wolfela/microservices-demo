@@ -2,18 +2,28 @@ package main
 
 import (
 	"log"
+	"path"
+	"path/filepath"
+	"runtime"
 
 	pb "./protoc"
+	"github.com/tkanos/gonfig"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-const (
-	address         = "localhost:50051"
-	defaultFilename = "consignment.json"
-)
+type Configuration struct {
+	Port string
+}
 
 func main() {
+	configuration := Configuration{}
+	_, dir, _, _ := runtime.Caller(0)
+	err := gonfig.GetConf(path.Join(filepath.Dir(dir), "config/defaults.json"), &configuration)
+	if err != nil {
+		log.Fatalf("Failed getting configuration: %v", err)
+	}
+	address := "localhost:" + configuration.Port
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {

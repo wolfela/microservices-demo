@@ -3,19 +3,25 @@ package main
 import (
 	"log"
 	"net"
+	"path"
+	"path/filepath"
+	"runtime"
 
 	pb "./protoc"
+	"github.com/tkanos/gonfig"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-const (
-	port = ":50051"
-)
+type Configuration struct {
+	Port string
+}
 
 type service struct {
 }
 
+// Implements the first service function defined in protoc file
+// Sums the elements of a given array and returns the result in the defined response format
 func (s *service) SumArray(ctx context.Context, req *pb.Array) (*pb.Response, error) {
 	var sum int32
 	sum = 0
@@ -27,6 +33,9 @@ func (s *service) SumArray(ctx context.Context, req *pb.Array) (*pb.Response, er
 	return &pb.Response{Result: sum}, nil
 }
 
+// Implements the second service function defined in the protoc file
+// Concats given strings together and returns a single string in the defined response format
+// I ran out of ideas for simple functions :)
 func (s *service) SumWords(ctx context.Context, req *pb.StringArray) (*pb.String, error) {
 	var sum string
 	for i := range req.S {
@@ -37,10 +46,21 @@ func (s *service) SumWords(ctx context.Context, req *pb.StringArray) (*pb.String
 }
 
 func main() {
-	lis, err := net.Listen("tcp", port)
+	// Port is defined in config file as per 12factor standards
+	// Not defined in env since it should be the same for all deployments
+	configuration := Configuration{}
+	_, dir, _, _ := runtime.Caller(0)
+	err := gonfig.GetConf(path.Join(filepath.Dir(dir), "config/defaults.json"), &configuration)
+	if err != nil {
+		log.Fatalf("Failed getting configuration: %v", err)
+	}
+
+	// Launches the server to listen in the defined port
+	lis, err := net.Listen("tcp", ":"+configuration.Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	log.Printf("Service listening on port: %v", configuration)
 
 	s := grpc.NewServer()
 	pb.RegisterNumericalServiceServer(s, &service{})

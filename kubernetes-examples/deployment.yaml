@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: numerical-service-deployment
+  labels:
+    app: numerical-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: numerical-service
+  template:
+    metadata:
+      labels:
+        app: numerical-service
+    spec:
+      containers:
+      - name: numerical-service
+        image: custom_image_with_dependencies_and_code
+        ports:
+        - containerPort: 8000

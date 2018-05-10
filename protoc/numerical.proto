@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package go.micro.srv.numerical; 
+
+service NumericalService {
+  rpc SumArray(Array) returns (Response) {}
+  rpc SumWords(StringArray) returns (String) {}
+}
+
+message Array {
+  repeated int32 ints = 1;
+}
+
+message StringArray {
+  repeated string s = 1;
+}
+
+message Integer {
+  int32 int = 1;
+}
+
+message String {
+  string s = 1;
+}
+
+message Response {
+  int32 result = 1;
+}
